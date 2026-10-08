@@ -1,21 +1,22 @@
 # 📚 BỘ TÀI LIỆU KIẾN TRÚC & CẨM NANG KỸ THUẬT BACKEND ENTERPRISE
 
-Bộ tài liệu này cung cấp toàn cảnh kiến trúc chuyên sâu (Deep Dive), phân tích cơ chế nội tại, các cạm bẫy thực tế trên Production và ngân hàng câu hỏi phỏng vấn Senior/Staff cho 8 công nghệ và mô hình kiến trúc cốt lõi:
+> **Dành cho ứng viên**: Nguyễn Đức Quỳnh – Backend / Fullstack Engineer  
+> Bộ tài liệu cung cấp toàn cảnh kiến trúc chuyên sâu (Deep Dive), phân tích cơ chế nội tại, các cạm bẫy thực tế trên Production và ngân hàng câu hỏi phỏng vấn Senior/Staff gắn liền trực tiếp với các dự án thực tế trong CV (**ViShop WMS/OMS**, **Multimodal RAG pgvector**, **CRMAgent Dynamic Schema**, **MIAPET & VNPay Payment**).
 
 ---
 
 ## 📑 Danh mục các chuyên đề chi tiết
 
-| STT | Tài liệu chuyên đề | Trọng tâm nội dung chính | File đính kèm |
+| STT | Chuyên đề công nghệ | Trọng tâm nội dung chính | File đính kèm |
 | :---: | :--- | :--- | :--- |
-| **01** | **Node.js Architecture** | Libuv Event Loop phases, Microtasks priority, Worker Threads, Memory leaks, AsyncLocalStorage, Graceful Shutdown. | [01-nodejs.md](file:///c:/Users/Admin/Documents/Project/interview/01-nodejs.md) |
-| **02** | **PostgreSQL & Database** | MVCC, WAL & Checkpoints, Isolation Levels, Row-level Locking, Indexing (B-Tree, GIN, BRIN, Covering), PgBouncer, Autovacuum. | [02-database-postgresql.md](file:///c:/Users/Admin/Documents/Project/interview/02-database-postgresql.md) |
-| **03** | **Redis Deep-Dive** | I/O Multiplexing, Data Structures thực chiến, Cache Stampede/Penetration/Avalanche, Distributed Lock với Lua, Eviction policies, RDB vs AOF. | [03-redis.md](file:///c:/Users/Admin/Documents/Project/interview/03-redis.md) |
-| **04** | **BullMQ & Task Queues** | Cấu trúc Redis ngầm (Streams/ZSets), Job Lifecycle, Stalled Jobs detection, Sandboxed Workers, Worker Concurrency vs DB Pool. | [04-bullmq.md](file:///c:/Users/Admin/Documents/Project/interview/04-bullmq.md) |
-| **05** | **RabbitMQ & Messaging** | AMQP 0-9-1, Exchanges (Topic, Fanout, Direct), Quorum Queues, Publisher Confirms, DLX & Exponential Retry, Flow Control. | [05-rabbitmq.md](file:///c:/Users/Admin/Documents/Project/interview/05-rabbitmq.md) |
-| **06** | **Elasticsearch Engine** | Inverted Index & Lucene Segments, Near Real-Time (Refresh vs Flush), Mapping Explosion, Quy tắc 50% Heap RAM, Deep Paging với PIT. | [06-elasticsearch.md](file:///c:/Users/Admin/Documents/Project/interview/06-elasticsearch.md) |
-| **07** | **Domain-Driven Design** | Strategic (Bounded Context, ACL), Tactical (Aggregate Root, Entity, Value Object, Domain Events), Rich vs Anemic Domain Model. | [07-domain-driven-design.md](file:///c:/Users/Admin/Documents/Project/interview/07-domain-driven-design.md) |
-| **08** | **CQRS Architecture** | Tách biệt Read/Write Model, Polyglot Persistence, Dual-Write & Transactional Outbox, Xử lý Eventual Consistency Delay. | [08-cqrs.md](file:///c:/Users/Admin/Documents/Project/interview/08-cqrs.md) |
+| **01** | **Node.js Architecture** | Libuv Event Loop phases, Microtasks priority, Worker Threads, Memory leaks, AsyncLocalStorage, Fastify 5 vs Express, Nx Monorepo. | • [01-theory-architecture.md](file:///c:/Users/ndquynh/Documents/interview/01-nodejs/01-theory-architecture.md)<br/>• [02-interview-questions-cv.md](file:///c:/Users/ndquynh/Documents/interview/01-nodejs/02-interview-questions-cv.md) |
+| **02** | **PostgreSQL & Database** | MVCC & Page Internals, WAL, Isolation Levels & Write Skew, Row-level Locking, Indexing (B-Tree, GIN, BRIN, Covering), SSI, WMS Ledger & pgvector. | • [01-theory-architecture.md](file:///c:/Users/ndquynh/Documents/interview/02-database/01-theory-architecture.md)<br/>• [02-interview-questions-cv.md](file:///c:/Users/ndquynh/Documents/interview/02-database/02-interview-questions-cv.md) |
+| **03** | **Redis Deep-Dive** | I/O Multiplexing, Threaded I/O, Cache Failure Modes, Distributed Lock với Lua, Leader Election, ZSet Sliding Window Rate Limiter. | • [01-theory-architecture.md](file:///c:/Users/ndquynh/Documents/interview/03-redis/01-theory-architecture.md)<br/>• [02-interview-questions-cv.md](file:///c:/Users/ndquynh/Documents/interview/03-redis/02-interview-questions-cv.md) |
+| **04** | **BullMQ & Task Queues** | Cấu trúc Redis ngầm (Streams/ZSets), Job Lifecycle, Stalled Jobs detection, Sandboxed Workers, Worker Concurrency vs DB Pool, Webhook Buffering. | • [01-theory-architecture.md](file:///c:/Users/ndquynh/Documents/interview/04-bullmq/01-theory-architecture.md)<br/>• [02-interview-questions-cv.md](file:///c:/Users/ndquynh/Documents/interview/04-bullmq/02-interview-questions-cv.md) |
+| **05** | **RabbitMQ & Messaging** | AMQP 0-9-1, Exchanges (Topic, Fanout, Direct), Quorum Queues (Raft), Zero Message Loss, DLX & Exponential Retry, Consistent Hash Sharding. | • [01-theory-architecture.md](file:///c:/Users/ndquynh/Documents/interview/05-rabbitmq/01-theory-architecture.md)<br/>• [02-interview-questions-cv.md](file:///c:/Users/ndquynh/Documents/interview/05-rabbitmq/02-interview-questions-cv.md) |
+| **06** | **Elasticsearch Engine** | Inverted Index & Lucene Segments, Near Real-Time (Refresh vs Flush), Mapping Strategy, Quy tắc 50% Heap RAM, BM25 vs TF-IDF, Reindexing Alias. | • [01-theory-architecture.md](file:///c:/Users/ndquynh/Documents/interview/06-elasticsearch/01-theory-architecture.md)<br/>• [02-interview-questions-cv.md](file:///c:/Users/ndquynh/Documents/interview/06-elasticsearch/02-interview-questions-cv.md) |
+| **07** | **Domain-Driven Design** | Strategic (Bounded Context, ACL), Tactical (Aggregate Root, Entity, Value Object, Domain Events), Rich vs Anemic Domain Model, Transaction Boundary. | • [01-theory-architecture.md](file:///c:/Users/ndquynh/Documents/interview/07-domain-driven-design/01-theory-architecture.md)<br/>• [02-interview-questions-cv.md](file:///c:/Users/ndquynh/Documents/interview/07-domain-driven-design/02-interview-questions-cv.md) |
+| **08** | **CQRS Architecture** | Tách biệt Read/Write Model, Polyglot Persistence, Dual-Write & Transactional Outbox, Xử lý Eventual Consistency Delay bằng SSE & Optimistic Lock. | • [01-theory-architecture.md](file:///c:/Users/ndquynh/Documents/interview/08-cqrs/01-theory-architecture.md)<br/>• [02-interview-questions-cv.md](file:///c:/Users/ndquynh/Documents/interview/08-cqrs/02-interview-questions-cv.md) |
 
 ---
 
@@ -47,10 +48,7 @@ flowchart LR
 
 ---
 
-## 💡 Hướng dẫn sử dụng cho Buổi phỏng vấn
+## 💡 Hướng dẫn ôn tập & Chuẩn bị phỏng vấn
 
-1. **Thẩm định chiều sâu (Depth Verification)**: Dùng các mục *Bẫy kỹ thuật & Lưu ý sống còn* và *Bộ câu hỏi phỏng vấn chuyên sâu* ở cuối mỗi file để đặt câu hỏi drill-down khi ứng viên nhắc tới các keyword tương ứng trong CV.
-2. **Kiểm tra kinh nghiệm thực chiến (Hands-on vs Theory)**: Tập trung vào các tình huống ứng viên đã từng giải quyết:
-   * Race condition trong Database / WMS Ledger ([02-database-postgresql.md](file:///c:/Users/Admin/Documents/Project/interview/02-database-postgresql.md))
-   * Stalled jobs và rò rỉ RAM trong BullMQ / Redis ([04-bullmq.md](file:///c:/Users/Admin/Documents/Project/interview/04-bullmq.md) & [03-redis.md](file:///c:/Users/Admin/Documents/Project/interview/03-redis.md))
-   * Thiết kế Transactional Outbox và Eventual Consistency trong CQRS ([08-cqrs.md](file:///c:/Users/Admin/Documents/Project/interview/08-cqrs.md))
+1. **File 01 (Lý thuyết & Kiến trúc)**: Giúp bạn hiểu sâu sắc nguyên lý cốt lõi, cơ chế tầng thấp của engine (Libuv, V8, MVCC, Lucene, AMQP, Raft), bảng đối chiếu tính năng và các cạm bẫy kỹ thuật sống còn trên Production.
+2. **File 02 (Câu hỏi phỏng vấn & Dự án trong CV)**: Thiết kế riêng theo từng bài toán và dự án thực tế trong CV của **Nguyễn Đức Quỳnh** (**ViShop**, **Multimodal RAG**, **CRMAgent**, **JIHO**, **MIAPET**), trang bị sẵn các câu trả lời "ăn điểm", code mẫu thực chiến và câu trả lời phản biện trước các câu hỏi vặn của Tech Lead / Staff Engineer.
