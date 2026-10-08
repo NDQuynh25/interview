@@ -110,7 +110,124 @@ flowchart TD
 
 ---
 
-## 4. Các cạm bẫy kỹ thuật sống còn (Production Caveats)
+## 4. Xử lý Ngôn ngữ phi Latinh: Tiếng Nhật & Plugin Kuromoji
+
+### 4.1. Tại sao tiếng Nhật khác biệt hoàn toàn với ngôn ngữ Latinh?
+* **Không có khoảng trắng phân tách từ (No Whitespace Word Delimiter)**:
+  * Tiếng Anh / tiếng Việt: `"Hệ thống phân tán"` $\rightarrow$ Tokenizer mặc định chỉ cần cắt theo dấu cách ` ` là ra được từng từ tố.
+  * Tiếng Nhật: `東京都に住んでいます` (Tôi sống ở Tokyo) $\rightarrow$ Viết liền một mạch, **không hề có khoảng trắng**! Nếu dùng `standard` tokenizer, nó chỉ cắt từng ký tự đơn lẻ hoặc bốc tách sai lệch ngữ nghĩa.
+* **Hỗn hợp 4 hệ chữ viết trong cùng một câu**:
+  * **Kanji (Hán tự)**: Biểu thị từ gốc ý nghĩa (`東京` - Tokyo, `医師` - Bác sĩ).
+  * **Hiragana**: Trợ từ, biến tố ngữ pháp (`に`, `で`, `います`).
+  * **Katakana**: Từ mượn nước ngoài (`プラットフォーム` - Platform, `ワクチン` - Vaccine).
+  * **Romaji / Latin / Số**: `COVID-19`, `JIHO`, `2026`.
+* **Hiện tượng đa cách đọc (Furigana / Reading)**:
+  * Cùng 1 chữ Kanji nhưng người dùng có thể gõ tìm kiếm bằng Hiragana hoặc Romaji (ví dụ gõ `とうきょう` hoặc `toukyou` để tìm `東京`).
+* **Độ rộng ký tự (Width Variation)**:
+  * Ký tự Half-width (`ｶﾀｶﾅ`, `123`) và Full-width (`カタカナ`, `１２３`) phải được chuẩn hóa về một dạng thống nhất.
+
+---
+
+### 4.2. Plugin Kuromoji (`analysis-kuromoji`) – Trái tim xử lý tiếng Nhật
+
+PostgreSQL / Elasticsearch xử lý tiếng Nhật thông qua bộ phân tích hình thái học **Kuromoji**:
+
+```mermaid
+flowchart LR
+    Raw["Văn bản: 東京都在住の医師"] --> CharF["1. icu_normalizer<br/>(Chuẩn hóa Half/Full-width)"]
+    CharF --> Tok["2. kuromoji_tokenizer<br/>(mode: 'search')"]
+    Tok --> Base["3. kuromoji_baseform<br/>(Đưa động từ về nguyên thể)"]
+    Base --> POS["4. kuromoji_part_of_speech<br/>(Lọc bỏ trợ từ vô nghĩa)"]
+    POS --> Read["5. kuromoji_readingform<br/>(Chuyển Kanji -> Katakana reading)"]
+    Read --> Terms["Lucene Inverted Index Terms"]
+```
+
+#### Các thành phần cốt lõi của Kuromoji:
+1. **`kuromoji_tokenizer`**:
+   * Mode `normal`: Phân tách theo từ điển thông thường (`関西国際空港` = Sân bay quốc tế Kansai).
+   * Mode `search` *(Khuyến nghị)*: Tự động chia nhỏ các từ ghép phức hợp (Compound Words) thành các từ tố nhỏ hơn: `関西` (Kansai) + `国際` (Quốc tế) + `空港` (Sân bay) $\rightarrow$ Tăng độ phủ tìm kiếm khi người dùng chỉ gõ một phần từ khóa.
+2. **`kuromoji_baseform`**: Đưa động từ, tính từ biến đổi đuôi về dạng nguyên thể từ điển (Dictionary Form): `食べた` (đã ăn) $\rightarrow$ `食べる` (ăn).
+3. **`kuromoji_part_of_speech`**: Tự động loại bỏ các hư từ không mang giá trị tìm kiếm (Trợ từ `は`, `が`, `を`, `に`, liên từ...).
+4. **`kuromoji_readingform`**: Chuyển đổi toàn bộ Kanji sang cách đọc Katakana/Romaji, cho phép tìm kiếm theo cách phát âm.
+5. **`kuromoji_stemmer`**: Chuẩn hóa trường âm Katakana (ví dụ: `サーバー` $\rightarrow$ `サーバ` - Server).
+
+---
+
+### 4.3. Cấu hình Custom Japanese Analyzer hoàn chỉnh trong Production
+
+```json
+PUT /japanese_medical_courses
+{
+  "settings": {
+    "analysis": {
+      "char_filter": {
+        "normalize_chars": {
+          "type": "icu_normalizer",
+          "name": "nfkc"
+        }
+      },
+      "filter": {
+        "kuromoji_pos_filter": {
+          "type": "kuromoji_part_of_speech",
+          "stoptags": ["助词", "助动词", "记号"]
+        },
+        "kuromoji_reading": {
+          "type": "kuromoji_readingform",
+          "use_romaji": false
+        },
+        "kuromoji_stem": {
+          "type": "kuromoji_stemmer",
+          "minimum_length": 4
+        }
+      },
+      "analyzer": {
+        "japanese_morph_analyzer": {
+          "type": "custom",
+          "char_filter": ["normalize_chars"],
+          "tokenizer": "kuromoji_tokenizer",
+          "filter": [
+            "kuromoji_baseform",
+            "kuromoji_pos_filter",
+            "kuromoji_stem",
+            "lowercase"
+          ]
+        },
+        "japanese_reading_analyzer": {
+          "type": "custom",
+          "char_filter": ["normalize_chars"],
+          "tokenizer": "kuromoji_tokenizer",
+          "filter": [
+            "kuromoji_reading",
+            "lowercase"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "course_title": {
+        "type": "text",
+        "analyzer": "japanese_morph_analyzer",
+        "fields": {
+          "reading": {
+            "type": "text",
+            "analyzer": "japanese_reading_analyzer"
+          },
+          "raw": {
+            "type": "keyword"
+          }
+        }
+      }
+    }
+  }
+}
+```
+* **Khi tìm kiếm**: Cho phép người dùng gõ từ khóa tiếng Nhật chuẩn (`臨床研修`), gõ cách đọc Hiragana (`りんしょうけんしゅう`), hoặc gõ từ mượn Katakana đều trả về kết quả chính xác tuyệt đối!
+
+---
+
+## 5. Các cạm bẫy kỹ thuật sống còn (Production Caveats)
 
 | STT | Bẫy kỹ thuật | Hậu quả thực tế | Giải pháp chuẩn Production |
 | :--- | :--- | :--- | :--- |
