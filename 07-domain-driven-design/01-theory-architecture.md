@@ -1,6 +1,6 @@
 # 📗 CHUYÊN ĐỀ 07.1: DOMAIN-DRIVEN DESIGN – LÝ THUYẾT & KIẾN TRÚC LÕI
 
-> **Mục tiêu**: Nắm vững phương pháp luận Domain-Driven Design (DDD), phân biệt rạch ròi giữa Thiết kế Chiến lược (Strategic Design) và Thiết kế Chiến thuật (Tactical Design), cấu trúc Rich Domain Model, ranh giới Aggregate Root và nguyên tắc Transaction Boundary.
+> **Mục tiêu**: Nắm vững phương pháp luận Domain-Driven Design (DDD), phân biệt rạch ròi giữa Thiết kế Chiến lược (Strategic Design) và Thiết kế Chiến thuật (Tactical Design), Kiến trúc 4 tầng chuẩn (4-Layer Architecture), cấu trúc Rich Domain Model, ranh giới Aggregate Root và nguyên tắc Transaction Boundary.
 
 ---
 
@@ -76,9 +76,73 @@ classDiagram
 
 ---
 
-## 3. Triển khai Code Rich Domain Model (TypeScript)
+## 3. Kiến trúc 4 tầng chuẩn trong DDD (The 4-Layer Architecture)
 
-### 3.1. Value Object: `Money` (Bất biến)
+Trong kiến trúc hướng miền (DDD), hệ thống phân tách rạch ròi thành 4 tầng độc lập nhằm bảo vệ **Nghiệp vụ cốt lõi (Domain)** hoàn toàn độc lập với **Công nghệ / Cơ sở hạ tầng (Infrastructure)**.
+
+```mermaid
+flowchart TD
+    subgraph L1 ["1. Presentation Layer (UI / API)"]
+        Controllers["Controllers / GraphQL Resolvers<br>CLI / Webhook Handlers"]
+    end
+
+    subgraph L2 ["2. Application Layer (Orchestration & Use Cases)"]
+        AppServices["Command & Query Handlers (Use Cases)<br>DTOs, Transaction Orchestration"]
+    end
+
+    subgraph L3 ["3. Domain Layer (The Core Heart - Pure Business)"]
+        Aggregates["Aggregate Roots & Entities<br>Value Objects & Domain Events"]
+        DomainServices["Domain Services (Cross-Aggregate Logic)"]
+        RepoInterfaces["Repository Interfaces (Contracts)"]
+    end
+
+    subgraph L4 ["4. Infrastructure Layer (I/O & Technologies)"]
+        RepoImpl["Database & ORM Repositories (Postgres, Prisma)"]
+        Brokers["Message Brokers (RabbitMQ, Kafka, Redis)"]
+        External["Third-Party API Adapters (ACL)"]
+    end
+
+    Controllers -->|"Gửi DTO"| AppServices
+    AppServices -->|"Tải & Gọi hàm nghiệp vụ"| Aggregates
+    AppServices -->|"Điều phối"| DomainServices
+    AppServices -->|"Gọi Interface"| RepoInterfaces
+    RepoImpl -.->|"Implements (DIP)"| RepoInterfaces
+    Brokers -.->|"Implements"| AppServices
+```
+
+### 3.1. Chi tiết trách nhiệm & Quy tắc từng tầng
+
+| Tầng (Layer) | Trách nhiệm chính | Thành phần cốt lõi | Quy tắc cấm kỵ |
+| :--- | :--- | :--- | :--- |
+| **1. Presentation (UI/API)** | Tiếp nhận request từ bên ngoài, validate schema định dạng và format dữ liệu trả về. | REST Controllers, GraphQL Resolvers, CLI Commands, Webhooks, Request DTOs. | **Tuyệt đối không chứa logic nghiệp vụ**; không gọi thẳng Database hay ORM. |
+| **2. Application (Use Cases)** | Nhạc trưởng điều phối (Workflow Orchestration): mở Transaction, nạp Aggregate từ Repository, gọi hàm nghiệp vụ của Domain, bắn Events. | Use Cases / Command Handlers (`CreateOrderUseCase`), Application Services, Unit of Work. | **Không chứa Business Rules** (luật tính tiền, chiết khấu, điều kiện đơn hàng phải thuộc về Domain). |
+| **3. Domain (Core Business)** | Thể hiện toàn bộ quy tắc, khái niệm và trạng thái của nghiệp vụ. Là tầng trung tâm, không phụ thuộc tầng nào. | Aggregate Root, Entities, Value Objects, Domain Events, Domain Services, **Repository Interfaces**. | **Pure Code (POJO/PONO 100%)**: Không import Express, NestJS, Prisma, TypeORM hay bất kỳ thư viện I/O nào. |
+| **4. Infrastructure (Hạ tầng)** | Cung cấp năng lực kỹ thuật và kết nối vật lý I/O với môi trường bên ngoài để hỗ trợ 3 tầng trên. | Repository Impl (`PostgresOrderRepository`), Message Broker Adapters (RabbitMQ), Redis Cache, 3rd Party ACL. | Không để rò rỉ các kiểu dữ liệu hạ tầng (SQL row, Prisma entity) ngược vào trong Domain. |
+
+### 3.2. Luồng thực thi End-to-End (Ví dụ: Tạo đơn hàng)
+```
+[1. Presentation] ──(HTTP POST DTO)──> [2. Application: CreateOrderUseCase]
+                                              │
+                                              ├─(1. Load Customer)──> [4. Infrastructure: DB]
+                                              ├─(2. Order.create())──> [3. Domain: Order Aggregate]
+                                              ├─(3. orderRepo.save)──> [4. Infrastructure: DB]
+                                              └─(4. publishEvent)───> [4. Infrastructure: RabbitMQ]
+```
+
+### 3.3. Cấu trúc thư mục chuẩn thực chiến (Production Monorepo / Microservices)
+```bash
+modules/order/
+├── presentation/          # [TẦNG 1] Controllers, DTOs, Webhooks
+├── application/           # [TẦNG 2] Use Cases, Command Handlers, Event Handlers
+├── domain/                # [TẦNG 3 - ZERO EXTERNAL DEPS] Aggregates, Value Objects, Events, Repo Interfaces
+└── infrastructure/        # [TẦNG 4] Prisma/TypeORM Repositories, RabbitMQ Publisher, ACL Adapters
+```
+
+---
+
+## 4. Triển khai Code Rich Domain Model (TypeScript)
+
+### 4.1. Value Object: `Money` (Bất biến)
 ```typescript
 export class Money {
   private constructor(
@@ -106,7 +170,7 @@ export class Money {
 }
 ```
 
-### 3.2. Aggregate Root: `Order` (Bảo vệ Bất biến)
+### 4.2. Aggregate Root: `Order` (Bảo vệ Bất biến)
 ```typescript
 export class Order {
   private _items: OrderItem[] = [];
@@ -167,7 +231,7 @@ export class Order {
 
 ---
 
-## 4. Các cạm bẫy kỹ thuật sống còn (Production Caveats)
+## 5. Các cạm bẫy kỹ thuật sống còn (Production Caveats)
 
 | STT | Bẫy kỹ thuật | Hậu quả thực tế | Giải pháp chuẩn Production |
 | :--- | :--- | :--- | :--- |

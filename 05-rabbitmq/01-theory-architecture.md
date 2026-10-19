@@ -11,13 +11,11 @@ RabbitMQ hoạt động dựa trên chuẩn giao thức **AMQP 0-9-1 (Advanced M
 
 ```mermaid
 flowchart LR
-    Publisher["Publisher (Order Service)"] -->|Publish with Routing Key| Exchange{"Exchange<br/>(Direct / Topic / Fanout)"}
-    
-    Exchange -->|Binding: order.created| Queue1[("Queue: Inventory Worker")]
-    Exchange -->|Binding: order.*| Queue2[("Queue: Analytics Worker")]
-    
-    Queue1 -->|Push with Prefetch QoS| Consumer1["Consumer (Node.js Pod 1)"]
-    Queue1 -->|Push with Prefetch QoS| Consumer2["Consumer (Node.js Pod 2)"]
+    Publisher["Publisher (Order Service)"] -->|"Publish with Routing Key"| Exchange{"Exchange<br>(Direct / Topic / Fanout)"}
+    Exchange -->|"Binding: order.created"| Queue1[("Queue: Inventory Worker")]
+    Exchange -->|"Binding: order.*"| Queue2[("Queue: Analytics Worker")]
+    Queue1 -->|"Push with Prefetch QoS"| Consumer1["Consumer (Node.js Pod 1)"]
+    Queue1 -->|"Push with Prefetch QoS"| Consumer2["Consumer (Node.js Pod 2)"]
 ```
 
 ### 1.2. Phân loại 4 loại Exchanges & Cơ chế định tuyến
@@ -80,14 +78,11 @@ Nếu worker gặp bug code hoặc dữ liệu sai format mà gọi `channel.nac
 
 ```mermaid
 flowchart TD
-    MainQ[("Main Queue: order.process")] -->|Worker lỗi -> Nack(requeue=false)| DLX{"Dead Letter Exchange (DLX)"}
-    
-    DLX -->|Routing Key: retry| RetryQ[("Retry Queue (TTL: 30s)<br/>Không có Consumer")]
-    
-    RetryQ -->|Sau 30s hết TTL -> Message Expired| MainExchange{"Main Exchange"}
-    MainExchange -->|Đẩy ngược lại| MainQ
-    
-    RetryQ -->|Nếu vượt quá 3 lần Retry| ParkingQ[("Parking / Final DLQ<br/>(Lưu vết chờ điều tra thủ công)")]
+    MainQ[("Main Queue: order.process")] -->|"Worker lỗi ➔ Nack(requeue=false)"| DLX{"Dead Letter Exchange (DLX)"}
+    DLX -->|"Routing Key: retry"| RetryQ[("Retry Queue (TTL: 30s)<br>Không có Consumer")]
+    RetryQ -->|"Sau 30s hết TTL ➔ Message Expired"| MainExchange{"Main Exchange"}
+    MainExchange -->|"Đẩy ngược lại"| MainQ
+    RetryQ -->|"Nếu vượt quá 3 lần Retry"| ParkingQ[("Parking / Final DLQ<br>(Lưu vết chờ điều tra thủ công)")]
 ```
 
 ---
