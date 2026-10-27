@@ -15,9 +15,8 @@
 | **04** | **BullMQ & Task Queues** | Cấu trúc Redis ngầm (Streams/ZSets), Job Lifecycle, Stalled Jobs detection, Sandboxed Workers, Worker Concurrency vs DB Pool, Webhook Buffering. | • [01-theory-architecture.md](file:///c:/Users/ndquynh/Documents/interview/04-bullmq/01-theory-architecture.md)<br/>• [02-interview-questions-cv.md](file:///c:/Users/ndquynh/Documents/interview/04-bullmq/02-interview-questions-cv.md) |
 | **05** | **RabbitMQ & Messaging** | AMQP 0-9-1, Exchanges (Topic, Fanout, Direct), Quorum Queues (Raft), Zero Message Loss, DLX & Exponential Retry, Consistent Hash Sharding. | • [01-theory-architecture.md](file:///c:/Users/ndquynh/Documents/interview/05-rabbitmq/01-theory-architecture.md)<br/>• [02-interview-questions-cv.md](file:///c:/Users/ndquynh/Documents/interview/05-rabbitmq/02-interview-questions-cv.md) |
 | **06** | **Elasticsearch Engine** | Inverted Index & Lucene Segments, Xử lý Tiếng Nhật (Kuromoji NLP & N-gram), Refresh vs Flush, Mapping, 50% Heap RAM, BM25, JIHO Medical Search. | • [01-theory-architecture.md](file:///c:/Users/ndquynh/Documents/interview/06-elasticsearch/01-theory-architecture.md)<br/>• [02-interview-questions-cv.md](file:///c:/Users/ndquynh/Documents/interview/06-elasticsearch/02-interview-questions-cv.md) |
-| **07** | **Domain-Driven Design** | Strategic (Bounded Context, ACL), Tactical (Aggregate Root, Entity, Value Object, Domain Events), Rich vs Anemic Domain Model, Transaction Boundary. | • [01-theory-architecture.md](file:///c:/Users/ndquynh/Documents/interview/07-domain-driven-design/01-theory-architecture.md)<br/>• [02-interview-questions-cv.md](file:///c:/Users/ndquynh/Documents/interview/07-domain-driven-design/02-interview-questions-cv.md) |
-| **08** | **CQRS Architecture** | Tách biệt Read/Write Model, Polyglot Persistence, Dual-Write & Transactional Outbox, Xử lý Eventual Consistency Delay bằng SSE & Optimistic Lock. | • [01-theory-architecture.md](file:///c:/Users/ndquynh/Documents/interview/08-cqrs/01-theory-architecture.md)<br/>• [02-interview-questions-cv.md](file:///c:/Users/ndquynh/Documents/interview/08-cqrs/02-interview-questions-cv.md) |
-| **09** | **Docker & Containers** | Linux Namespaces & Cgroups, OverlayFS CoW, OCI Runtime (dockerd/containerd/runc), Docker Networking & iptables, Multi-stage Builds, PID 1 & Tini, OOMKilled. | • [01-theory-architecture.md](file:///c:/Users/ndquynh/Documents/interview/09-docker/01-theory-architecture.md)<br/>• [02-interview-questions-cv.md](file:///c:/Users/ndquynh/Documents/interview/09-docker/02-interview-questions-cv.md) |
+| **07** | **Architectural Patterns (DDD & CQRS)** | **07.1 Domain-Driven Design**: Strategic (Bounded Context, ACL), Tactical (Aggregate Root, Invariants), Domain Events.<br/>**07.2 CQRS Architecture**: Read/Write Stack, Polyglot Persistence, Dual-Write & Transactional Outbox, SSE & Eventual Consistency. | • [Chỉ mục Architectural Patterns](file:///c:/Users/Admin/Documents/Project/interview/07-architectural-patterns/README.md)<br/>• [07.1 DDD Theory](file:///c:/Users/Admin/Documents/Project/interview/07-architectural-patterns/01-domain-driven-design/01-theory-architecture.md) & [CV](file:///c:/Users/Admin/Documents/Project/interview/07-architectural-patterns/01-domain-driven-design/02-interview-questions-cv.md)<br/>• [07.2 CQRS Theory](file:///c:/Users/Admin/Documents/Project/interview/07-architectural-patterns/02-cqrs/01-theory-architecture.md) & [CV](file:///c:/Users/Admin/Documents/Project/interview/07-architectural-patterns/02-cqrs/02-interview-questions-cv.md) |
+| **08** | **Docker & Containers** | Linux Namespaces & Cgroups, OverlayFS CoW, OCI Runtime (dockerd/containerd/runc), Docker Networking & iptables, Multi-stage Builds, PID 1 & Tini, OOMKilled. | • [01-theory-architecture.md](file:///c:/Users/Admin/Documents/Project/interview/08-docker/01-theory-architecture.md)<br/>• [02-interview-questions-cv.md](file:///c:/Users/Admin/Documents/Project/interview/08-docker/02-interview-questions-cv.md) |
 
 ---
 
@@ -27,11 +26,11 @@
 flowchart LR
     Client["Client Request"] --> NodeApp["01. Node.js (NestJS / Fastify)"]
     
-    subgraph DockerEnv ["09. Containerized Infrastructure (Docker & Compose)"]
-        subgraph "DDD & CQRS Core"
-            NodeApp --> DDD["07. DDD Aggregate & Invariants"]
-            DDD --> CQRS_W["08. CQRS Write Stack"]
-            NodeApp --> CQRS_R["08. CQRS Query Stack"]
+    subgraph DockerEnv ["08. Containerized Infrastructure (Docker & Compose)"]
+        subgraph ArchPatterns ["07. Architectural Patterns (DDD & CQRS Core)"]
+            NodeApp --> DDD["07.1. DDD Aggregate & Invariants"]
+            DDD --> CQRS_W["07.2. CQRS Write Stack"]
+            NodeApp --> CQRS_R["07.2. CQRS Query Stack"]
         end
         
         subgraph "Storage & Caching"

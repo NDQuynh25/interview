@@ -1,4 +1,4 @@
-# 🎯 CHUYÊN ĐỀ 09.2: DOCKER – BỘ CÂU HỎI PHỎNG VẤN SENIOR & ÁP DỤNG DỰ ÁN THỰC CHIẾN TRONG CV
+# 🎯 CHUYÊN ĐỀ 08.2: DOCKER – BỘ CÂU HỎI PHỎNG VẤN SENIOR & ÁP DỤNG DỰ ÁN THỰC CHIẾN TRONG CV
 
 > **Ứng viên**: Nguyễn Đức Quỳnh – Backend / Fullstack Engineer  
 > **Mục tiêu**: Bộ câu hỏi phỏng vấn chuyên sâu về Containerization kết hợp trực tiếp với kinh nghiệm trong CV: **ViShop Nx Monorepo (15 Domain Modules & Docker Compose Local Dev)**, **Multimodal RAG Platform (Tối ưu Dockerfile với uv)**, **Multi-stage Build giảm 90% Image Size**, **OOMKilled Troubleshooting**, và **PID 1 Graceful Shutdown**.

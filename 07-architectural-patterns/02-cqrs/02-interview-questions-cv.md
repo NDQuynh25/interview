@@ -1,4 +1,4 @@
-# 🎯 CHUYÊN ĐỀ 08.2: CQRS – BỘ CÂU HỎI PHỎNG VẤN SENIOR & ÁP DỤNG DỰ ÁN THỰC CHIẾN TRONG CV
+# 🎯 CHUYÊN ĐỀ 07.2: CQRS – BỘ CÂU HỎI PHỎNG VẤN SENIOR & ÁP DỤNG DỰ ÁN THỰC CHIẾN TRONG CV
 
 > **Ứng viên**: Nguyễn Đức Quỳnh – Backend / Fullstack Engineer  
 > **Mục tiêu**: Bộ câu hỏi phỏng vấn chuyên sâu về kiến trúc CQRS gắn liền với dự án **ViShop (WMS/OMS Platform)**: **Phân tách Command & Query Stack**, **Giải quyết Eventual Consistency Lag với Server-Sent Events (SSE)**, **Optimistic Concurrency Control (OCC)**, và **Chống lỗi Dual-Write với Transactional Outbox**.
@@ -25,10 +25,29 @@
 
 ---
 
-### Case 2: Hóa giải Eventual Consistency Delay với Server-Sent Events (SSE)
+### Case 2: Sự cộng hưởng giữa DDD và CQRS – Hóa giải bài toán Aggregate Bloating và Query Impasse
+> **Trích dẫn CV**: *"Architected a production-grade Nx Monorepo with 15 domain modules and 4 runnable microservices, adopting Domain-Driven Design (DDD) and CQRS..."*
+
+#### Q2: Tại sao khi áp dụng Domain-Driven Design (DDD) trong ViShop, em lại bắt buộc phải đi cùng với CQRS? Nếu chỉ dùng DDD thuần túy mà không có CQRS thì hệ thống sẽ gặp bế tắc gì?
+* 💡 **Câu trả lời ăn điểm**:
+  * **Bế tắc của DDD thuần túy khi không có CQRS (The Query Impasse)**:
+    * Trong DDD, nguyên tắc cốt lõi là **mọi tương tác dữ liệu phải thông qua Aggregate Root** để bảo vệ tính toàn vẹn và bất biến (Business Invariants).
+    * Khi merchant cần xem màn hình Danh sách đơn hàng tổng hợp (Order Management Dashboard): Màn hình đòi hỏi hiển thị Tên khách hàng, Địa chỉ giao hàng, Danh sách mã SKU + Tên sản phẩm + Ảnh, Trạng thái vận đơn từ hãng vận chuyển, và Tổng tiền đã trừ voucher.
+    * **Nếu không có CQRS**:
+      1. Ta buộc phải dùng Repository nạp cả Aggregate `Order`, `Customer`, `Product`, `Shipping` vào bộ nhớ RAM $\rightarrow$ Gây nghẽn CPU, tràn RAM và thời gian phản hồi tăng lên hàng giây.
+      2. Gây ra hiện tượng **Aggregate Bloating**: Lập trình viên có xu hướng nhồi nhét hàng tá trường, thuộc tính và hàm getter chỉ phục vụ việc hiển thị UI vào trong Aggregate Root $\rightarrow$ Phá vỡ tính bao đóng và làm vấy bẩn Domain Model.
+      3. Không thể thực hiện các câu query lọc động (filter theo 10 tiêu chí), tìm kiếm toàn văn hay phân trang một cách hiệu quả trên Database.
+  * **CQRS giải phóng DDD như thế nào trong ViShop**:
+    * **Tầng Ghi (Command Stack)**: DDD phát huy sức mạnh tối đa. Aggregate Root (`Order`, `InventoryItem`) trở nên cực kỳ tinh gọn, chỉ chứa logic kiểm tra bất biến (ví dụ: `order.cancel()`, `inventory.deductStock()`), không gánh bất kỳ trường dư thừa nào của UI.
+    * **Tầng Đọc (Query Stack)**: Bỏ qua 100% Domain Model, Aggregate Root và Repository. Query Handler đọc trực tiếp từ các Read Projections (PostgreSQL View phẳng hoặc Elasticsearch) map thẳng ra DTO trả về cho UI với độ trễ $< 20ms$.
+    * **Cầu nối hoàn hảo**: Các **Domain Events** được sinh ra từ Aggregate Root trong DDD chính là nguồn dữ liệu chuẩn mực để đồng bộ sang Read Projections của CQRS thông qua Transactional Outbox.
+
+---
+
+### Case 3: Hóa giải Eventual Consistency Delay với Server-Sent Events (SSE)
 > **Trích dẫn CV**: *"Developed Server-Sent Events (SSE) for real-time order, inventory, and synchronization status updates to connected clients."*
 
-#### Q2: Trong kiến trúc CQRS với Polyglot Persistence hoặc Asynchronous Projections, luôn tồn tại độ trễ đồng bộ (Eventual Consistency Lag). Em đã dùng Server-Sent Events (SSE) để giải quyết trải nghiệm người dùng như thế nào?
+#### Q3: Trong kiến trúc CQRS với Polyglot Persistence hoặc Asynchronous Projections, luôn tồn tại độ trễ đồng bộ (Eventual Consistency Lag). Em đã dùng Server-Sent Events (SSE) để giải quyết trải nghiệm người dùng như thế nào?
 * 💡 **Câu trả lời ăn điểm**:
   * **Thách thức**: Sau khi merchant ấn "Đồng bộ đơn hàng từ TikTok Shop", Command trả về mã `202 Accepted` ngay lập tức để giải phóng HTTP thread. Tuy nhiên, nếu merchant refresh trang ngay, danh sách đơn hàng vẫn chưa cập nhật do worker đang xử lý ngầm $\rightarrow$ Gây hoang mang cho merchant.
   * **Giải pháp kết hợp CQRS + SSE**:
@@ -44,10 +63,10 @@
 
 ---
 
-### Case 3: Xử lý Xung đột Ghi đồng thời với Optimistic Concurrency Control (OCC)
+### Case 4: Xử lý Xung đột Ghi đồng thời với Optimistic Concurrency Control (OCC)
 > **Trích dẫn CV**: *"maintain inventory consistency and prevent race conditions during warehouse transfers and concurrent updates."*
 
-#### Q3: Khi hai Command đồng thời cùng cố gắng sửa đổi một Aggregate trong mô hình CQRS, em xử lý xung đột ra sao để không bị mất dữ liệu?
+#### Q4: Khi hai Command đồng thời cùng cố gắng sửa đổi một Aggregate trong mô hình CQRS, em xử lý xung đột ra sao để không bị mất dữ liệu?
 * 💡 **Câu trả lời ăn điểm**:
   * **Triển khai Optimistic Concurrency Control (OCC) bằng cột `version`**:
     1. Mỗi Aggregate Root trong Write Database đều mang theo một trường `version INT DEFAULT 1`.
@@ -69,7 +88,7 @@
 
 ## PHẦN 2: BỘ CÂU HỎI VỀ CQRS ARCHITECTURAL TRADE-OFFS
 
-### Q4: Khi nào bạn KHÔNG NÊN sử dụng kiến trúc CQRS?
+### Q5: Khi nào bạn KHÔNG NÊN sử dụng kiến trúc CQRS?
 * 💡 **Câu trả lời ăn điểm**:
   * Tuyệt đối không nên áp dụng CQRS khi:
     1. **Hệ thống là CRUD cơ bản**: Số lượng thao tác đọc và ghi tương đương nhau, mô hình dữ liệu đọc không khác biệt so với mô hình ghi.
@@ -78,7 +97,7 @@
 
 ---
 
-### Q5: Phân biệt sự khác nhau giữa CQRS và Event Sourcing? Có bắt buộc phải dùng Event Sourcing khi làm CQRS không?
+### Q6: Phân biệt sự khác nhau giữa CQRS và Event Sourcing? Có bắt buộc phải dùng Event Sourcing khi làm CQRS không?
 * 💡 **Câu trả lời ăn điểm**:
   * **Sự khác biệt**:
     * **CQRS (Command Query Responsibility Segregation)**: Là mô hình phân tách đường dẫn ghi (Command) và đường dẫn đọc (Query). **Không quy định cách bạn lưu trữ dữ liệu ở tầng ghi**. Tầng ghi hoàn toàn có thể là một cơ sở dữ liệu quan hệ PostgreSQL lưu trạng thái hiện tại (Current State).

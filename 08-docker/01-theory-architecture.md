@@ -1,4 +1,4 @@
-# 📗 CHUYÊN ĐỀ 09.1: DOCKER ARCHITECTURE – LÝ THUYẾT & KIẾN TRÚC LÕI
+# 📗 CHUYÊN ĐỀ 08.1: DOCKER ARCHITECTURE – LÝ THUYẾT & KIẾN TRÚC LÕI
 
 > **Mục tiêu**: Nắm vững bản chất tầng thấp của Linux Containers (Namespaces, Cgroups, OverlayFS), kiến trúc Docker Engine (dockerd, containerd, runc), cơ chế Docker Networking & Iptables, Multi-stage Builds tối ưu kích thước Image, và giải quyết triệt để vấn đề PID 1 & Signal Handling trong môi trường Enterprise.
 
