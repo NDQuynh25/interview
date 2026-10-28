@@ -667,3 +667,8 @@ Khi load một Entity vào trạng thái **Managed**, Hibernate tự động ch�
   ```
   * *Nguyên nhân*: `@Transactional` hoạt động nhờ cơ chế AOP Proxy. Khi gọi `this.processPayment()`, lời gọi hàm diễn ra trực tiếp trên instance nội bộ, không đi qua lớp vỏ Proxy bên ngoài nên logic quản lý transaction bị bỏ qua hoàn toàn.
   * *Cách sửa*: Tách `processPayment()` sang một Bean độc lập (`PaymentProcessorService`) và inject vào, hoặc dùng `AopContext.currentProxy()`.
+
+---
+
+> 📖 **Xem tiếp chuyên đề chuyên sâu**: Toàn bộ kiến trúc Auto-Configuration, Bean Lifecycle, DispatcherServlet, Spring Security 6, HikariCP, Actuator và Virtual Threads được phân tích chuyên sâu tại: [10-spring-boot/01-theory-architecture.md](file:///c:/Users/Admin/Documents/Project/interview/10-spring-boot/01-theory-architecture.md) & [10-spring-boot/02-interview-questions-cv.md](file:///c:/Users/Admin/Documents/Project/interview/10-spring-boot/02-interview-questions-cv.md).
+
