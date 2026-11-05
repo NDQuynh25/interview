@@ -21,6 +21,9 @@
 | **08** | **Docker & Containers** | Linux Namespaces & Cgroups, OverlayFS CoW, OCI Runtime (dockerd/containerd/runc), Docker Networking & iptables, Multi-stage Builds, PID 1 & Tini, OOMKilled. | • [01-theory-architecture.md](file:///c:/Users/Admin/Documents/Project/interview/08-docker/01-theory-architecture.md)<br/>• [02-interview-questions-cv.md](file:///c:/Users/Admin/Documents/Project/interview/08-docker/02-interview-questions-cv.md) |
 | **09** | **Java Core & Concurrency** | JVM Internals (Stack/Heap, GC G1/ZGC, Metaspace), JMM Concurrency (volatile, synchronized, Virtual Threads), Collections (HashMap, ConcurrentHashMap), OOP/SOLID, Pass-by-value, LRU Cache. | • [01-theory-architecture.md](file:///c:/Users/Admin/Documents/Project/interview/09-java/01-theory-architecture.md)<br/>• [02-interview-questions-cv.md](file:///c:/Users/Admin/Documents/Project/interview/09-java/02-interview-questions-cv.md) |
 | **10** | **Spring Boot Architecture** | Auto-Configuration SPI, Bean Lifecycle & Proxies (JDK vs CGLIB), DispatcherServlet & Filters/Interceptors, Hibernate Dirty Checking & N+1, OSIV Pool Leak, Transaction Propagation, Spring Security 6, Virtual Threads. | • [01-theory-architecture.md](file:///c:/Users/Admin/Documents/Project/interview/10-spring-boot/01-theory-architecture.md)<br/>• [02-interview-questions-cv.md](file:///c:/Users/Admin/Documents/Project/interview/10-spring-boot/02-interview-questions-cv.md) |
+| **11** | **Apache Kafka Streaming** | Distributed Commit Log, Zero-Copy & OS PageCache, KRaft Consensus, Producer Idempotence & acks=all, Rebalance Storm & Cooperative Sticky, Non-blocking Retry & DLQ. | • [01-theory-architecture.md](file:///c:/Users/Admin/Documents/Project/interview/11-kafka/01-theory-architecture.md)<br/>• [02-interview-questions-cv.md](file:///c:/Users/Admin/Documents/Project/interview/11-kafka/02-interview-questions-cv.md) |
+| **⭐** | **Fullstack NestJS & Next.js** | **Bộ cẩm nang thực chiến theo JD**: Tích hợp thanh toán 3rd-party, MySQL Index & Transaction, Next.js SSR/SEO, BullMQ, AI workflow, kịch bản Deal lương 16-18tr. | • [Cau_Tra_Loi_Phong_Van_Fullstack_NestJS_NextJS.md](file:///c:/Users/Admin/Documents/Project/interview/Cau_Tra_Loi_Phong_Van_Fullstack_NestJS_NextJS.md) |
+| **🚀** | **Backend Node.js & AI-Native (Cozy)** | **Bộ cẩm nang thực chiến theo JD Cozy (1.200 - 1.500 USD)**: Claude Code agent, CLAUDE.md, MCP, RAG Platform thực chiến, Polyglot DB, Bảo mật AI. | • [Cau_Tra_Loi_Phong_Van_Backend_NodeJS_AI_Cozy.md](file:///c:/Users/Admin/Documents/Project/interview/Cau_Tra_Loi_Phong_Van_Backend_NodeJS_AI_Cozy.md) |
 
 ---
 
@@ -42,9 +45,10 @@ flowchart LR
             SpringCore <--> Redis[("03. Redis (Cache / Lock / Idempotency)")]
         end
         
-        subgraph AsyncLayer ["Asynchronous Messaging"]
+        subgraph AsyncLayer ["Asynchronous Messaging & Streaming"]
             SpringCore --> BullMQ["04. BullMQ (Internal Jobs)"]
             ArchPatterns -- "Transactional Outbox" --> RabbitMQ["05. RabbitMQ (Inter-service Events)"]
+            ArchPatterns -- "Event Streaming / CDC" --> Kafka["11. Kafka (Event Streaming)"]
             RabbitMQ --> ElasticSync["Sync Worker -> Projection"]
             ElasticSync --> Elastic
         end
